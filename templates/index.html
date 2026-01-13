@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>民商法爆款文章爬虫</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .control-panel {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            color: white;
+        }
+        
+        .btn-info {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .input-label {
+            font-weight: bold;
+            color: #495057;
+            min-width: 100px;
+        }
+        
+        .input-field {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+        
+        .status-panel {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #4CAF50;
+        }
+        
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .status-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .status-label {
+            font-weight: bold;
+            color: #495057;
+        }
+        
+        .status-value {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        .progress-container {
+            margin: 20px 0;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            transition: width 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 16px;
+            font-weight: bold;
+            color: #6c757d;
+            transition: all 0.3s ease;
+        }
+        
+        .tab.active {
+            color: #4CAF50;
+            border-bottom: 3px solid #4CAF50;
+        }
+        
+        .tab:hover {
+            color: #4CAF50;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .log-container {
+            background: #1e1e1e;
+            color: #ffffff;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            padding: 20px;
+            border-radius: 8px;
+            height: 400px;
+            overflow-y: auto;
+            line-height: 1.5;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 2px 0;
+        }
+        
+        .log-timestamp {
+            color: #888;
+        }
+        
+        .config-editor {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .config-textarea {
+            width: 100%;
+            min-height: 400px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            padding: 12px;
+            resize: vertical;
+        }
+        
+        .config-actions {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 5px solid;
+        }
+        
+        .alert-success {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        
+        .alert-error {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        
+        .alert-info {
+            background: #d1ecf1;
+            border-color: #17a2b8;
+            color: #0c5460;
+        }
+        
+        .results-info {
+            background: #e3f2fd;
+            border: 1px solid #2196F3;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .file-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .control-panel {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .tabs {
+                flex-wrap: wrap;
+            }
+            
+            .tab {
+                flex: 1;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🕷️ 民商法爆款文章爬虫</h1>
+            <p>智能网络爬虫 - 自动抓取爆款法律文章</p>
+        </div>
+        
+        <div class="content">
+            <!-- 目标网站输入 -->
+            <div class="input-group">
+                <label class="input-label" for="targetUrl">目标网站:</label>
+                <input type="text" id="targetUrl" class="input-field" 
+                       placeholder="输入要爬取的目标网站URL，例如: https://example.com/articles"
+                       value="https://httpbin.org/html">
+                <button class="btn btn-info" onclick="updateTargetUrl()">更新目标</button>
+            </div>
+
+            <div class="input-group">
+                <label class="input-label" for="keywords">关键词:</label>
+                <input type="text" id="keywords" class="input-field"
+                       placeholder="多个关键词用空格或逗号分隔，例如：水利 投资, 国家水网">
+                <button class="btn btn-info" onclick="applyKeywords()">应用关键词</button>
+            </div>
+            
+            <!-- 控制面板 -->
+            <div class="control-panel">
+                <button id="startBtn" class="btn btn-primary" onclick="startScraping()">
+                    🚀 开始爬取
+                </button>
+                <button id="stopBtn" class="btn btn-danger" onclick="stopScraping()" disabled>
+                    ⏹️ 停止爬取
+                </button>
+                <button class="btn btn-info" onclick="loadConfig()">
+                    ⚙️ 刷新配置
+                </button>
+                <button class="btn btn-info" onclick="downloadResults()">
+                    📥 下载结果
+                </button>
+            </div>
+            
+            <!-- 状态面板 -->
+            <div class="status-panel">
+                <div class="status-item">
+                    <span class="status-label">运行状态:</span>
+                    <span class="status-value" id="status">就绪</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">进度:</span>
+                    <span class="status-value" id="progressText">0%</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">总文章数:</span>
+                    <span class="status-value" id="totalArticles">0</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">当前处理:</span>
+                    <span class="status-value" id="currentArticle">0</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-label">发现爆款:</span>
+                    <span class="status-value" id="bestsellersFound">0</span>
+                </div>
+            </div>
+            
+            <!-- 进度条 -->
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar" style="width: 0%">0%</div>
+                </div>
+            </div>
+            
+            <!-- 标签页 -->
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('logs')">📋 运行日志</button>
+                <button class="tab" onclick="showTab('config')">⚙️ 配置管理</button>
+                <button class="tab" onclick="showTab('results')">📊 爬取结果</button>
+            </div>
+            
+            <!-- 标签内容 -->
+            <div id="logs" class="tab-content active">
+                <div class="log-container" id="logContainer">
+                    <div class="log-entry">
+                        <span class="log-timestamp">[系统]</span> 欢迎使用民商法爆款文章爬虫Web界面
+                    </div>
+                </div>
+            </div>
+            
+            <div id="config" class="tab-content">
+                <div class="config-editor">
+                    <h3>配置文件编辑</h3>
+                    <textarea id="configTextarea" class="config-textarea"></textarea>
+                    <div class="config-actions">
+                        <button class="btn btn-primary" onclick="saveConfig()">💾 保存配置</button>
+                        <button class="btn btn-info" onclick="loadConfig()">🔄 重置配置</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="results" class="tab-content">
+                <div class="results-info">
+                    <h3>📊 爬取结果</h3>
+                    <div class="file-info">
+                        <span>结果文件:</span>
+                        <span id="fileStatus">暂无结果文件</span>
+                    </div>
+                    <div class="file-info">
+                        <span>最后更新:</span>
+                        <span id="lastUpdate">未更新</span>
+                    </div>
+                    <button class="btn btn-info" onclick="checkResults()">🔍 检查结果</button>
+                    <button class="btn btn-info" onclick="previewTop20()">👀 预览前20条</button>
+                </div>
+                <div class="results-info" id="previewSection" style="margin-top: 15px; display: none;">
+                    <h3>👀 预览（前20条）</h3>
+                    <div id="previewMeta" style="margin: 10px 0; color: #0c5460;"></div>
+                    <div style="overflow-x: auto;">
+                        <table id="previewTable" style="width: 100%; border-collapse: collapse;"></table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let statusInterval;
+        let logInterval;
+        
+        // 显示标签页
+        function showTab(tabName) {
+            // 隐藏所有标签内容
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 移除所有标签的active类
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // 显示选中的标签内容
+            document.getElementById(tabName).classList.add('active');
+            
+            // 激活对应的标签按钮
+            event.target.classList.add('active');
+        }
+        
+        // 开始爬取
+        async function startScraping() {
+            try {
+                const keywords = document.getElementById('keywords') ? document.getElementById('keywords').value : '';
+                const response = await fetch('/api/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ keywords })
+                });
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addLog('🚀 爬虫任务已启动', 'success');
+                    document.getElementById('startBtn').disabled = true;
+                    document.getElementById('stopBtn').disabled = false;
+                    startStatusUpdates();
+                    startLogUpdates();
+                } else {
+                    addLog(`❌ 启动失败: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                addLog(`❌ 网络错误: ${error.message}`, 'error');
+            }
+        }
+
+        function applyKeywords() {
+            const keywords = document.getElementById('keywords') ? document.getElementById('keywords').value.trim() : '';
+            if (keywords) {
+                addLog(`✅ 关键词已设置: ${keywords}`, 'success');
+            } else {
+                addLog('ℹ️ 已清空关键词（将输出所有含全文结果）', 'info');
+            }
+        }
+        
+        // 停止爬取
+        async function stopScraping() {
+            try {
+                const response = await fetch('/api/stop', { method: 'POST' });
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addLog('⏹️ 爬虫任务已停止', 'info');
+                    document.getElementById('startBtn').disabled = false;
+                    document.getElementById('stopBtn').disabled = true;
+                    stopStatusUpdates();
+                    stopLogUpdates();
+                } else {
+                    addLog(`❌ 停止失败: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                addLog(`❌ 网络错误: ${error.message}`, 'error');
+            }
+        }
+        
+        // 加载配置
+        async function loadConfig() {
+            try {
+                const response = await fetch('/api/config');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('configTextarea').value = JSON.stringify(data, null, 2);
+                    addLog('✅ 配置已加载', 'success');
+                } else {
+                    addLog(`❌ 加载配置失败: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                addLog(`❌ 网络错误: ${error.message}`, 'error');
+            }
+        }
+        
+        // 保存配置
+        async function saveConfig() {
+            try {
+                const configText = document.getElementById('configTextarea').value;
+                const configData = JSON.parse(configText);
+                
+                const response = await fetch('/api/config', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(configData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addLog('✅ 配置已保存', 'success');
+                } else {
+                    addLog(`❌ 保存配置失败: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                addLog(`❌ 配置格式错误或网络错误: ${error.message}`, 'error');
+            }
+        }
+        
+        // 下载结果
+        async function downloadResults() {
+            try {
+                let downloadName = 'minshangfa_bestsellers.csv';
+                try {
+                    const cfgResp = await fetch('/api/config?t=' + new Date().getTime());
+                    const cfg = await cfgResp.json();
+                    if (cfg && cfg.output && cfg.output.csv_filename) {
+                        downloadName = cfg.output.csv_filename;
+                    }
+                } catch (e) {}
+                const response = await fetch('/api/download');
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = downloadName;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    addLog('✅ 结果文件下载成功', 'success');
+                } else {
+                    const data = await response.json();
+                    addLog(`❌ 下载失败: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                addLog(`❌ 下载错误: ${error.message}`, 'error');
+            }
+        }
+        
+        // 检查结果
+        async function checkResults() {
+            try {
+                const response = await fetch('/api/download');
+                
+                if (response.ok) {
+                    const now = new Date().toLocaleString();
+                    document.getElementById('fileStatus').textContent = '结果文件存在';
+                    document.getElementById('lastUpdate').textContent = now;
+                    addLog('✅ 结果文件存在，可以下载', 'success');
+                } else {
+                    document.getElementById('fileStatus').textContent = '暂无结果文件';
+                    addLog('ℹ️ 暂无结果文件', 'info');
+                }
+            } catch (error) {
+                addLog(`❌ 检查错误: ${error.message}`, 'error');
+            }
+        }
+
+        async function previewTop20() {
+            try {
+                const response = await fetch('/api/preview?limit=20&t=' + new Date().getTime());
+                const data = await response.json();
+                if (!response.ok) {
+                    addLog(`❌ 预览失败: ${data.error || '未知错误'}`, 'error');
+                    return;
+                }
+
+                const items = data.items || [];
+                const previewSection = document.getElementById('previewSection');
+                const previewTable = document.getElementById('previewTable');
+                const previewMeta = document.getElementById('previewMeta');
+
+                previewSection.style.display = 'block';
+
+                if (items.length === 0) {
+                    previewMeta.textContent = '暂无可预览数据（请先运行爬虫并等待处理几条后停止）。';
+                    previewTable.innerHTML = '';
+                    return;
+                }
+
+                const totalText = data.total != null ? `总数: ${data.total}` : '总数: 未知';
+                const finishedText = data.finished_at ? `完成时间: ${data.finished_at}` : '';
+                previewMeta.textContent = `${totalText}${finishedText ? '，' + finishedText : ''}`;
+
+                const columns = ['title', 'publish_time', 'content_length', 'content_preview', 'detail_url', 'status_code', 'error'];
+                let html = '<tr>' + columns.map(c => `<th style="border: 1px solid #e9ecef; padding: 8px; text-align: left; background:#f8f9fa;">${c}</th>`).join('') + '</tr>';
+                html += items.map(row => {
+                    return '<tr>' + columns.map(c => {
+                        const v = row && row[c] != null ? String(row[c]) : '';
+                        const safe = v.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                        return `<td style="border: 1px solid #e9ecef; padding: 8px; vertical-align: top; max-width: 520px; word-break: break-all;">${safe}</td>`;
+                    }).join('') + '</tr>';
+                }).join('');
+                previewTable.innerHTML = html;
+            } catch (error) {
+                addLog(`❌ 预览错误: ${error.message}`, 'error');
+            }
+        }
+        
+        // 更新目标网站
+        async function updateTargetUrl() {
+            try {
+                const targetUrl = document.getElementById('targetUrl').value.trim();
+                if (!targetUrl) {
+                    addLog('❌ 请输入目标网站URL', 'error');
+                    return;
+                }
+                
+                if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
+                    addLog('❌ URL必须以http://或https://开头', 'error');
+                    return;
+                }
+                
+                // 获取当前配置
+                const response = await fetch('/api/config');
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    addLog(`❌ 获取配置失败: ${data.error}`, 'error');
+                    return;
+                }
+                
+                // 更新目标URL
+                data.target_platform.base_url = targetUrl;
+                
+                // 保存配置
+                const saveResponse = await fetch('/api/config', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const saveData = await saveResponse.json();
+                
+                if (saveResponse.ok) {
+                    addLog(`✅ 目标网站已更新为: ${targetUrl}`, 'success');
+                } else {
+                    addLog(`❌ 更新失败: ${saveData.error}`, 'error');
+                }
+            } catch (error) {
+                addLog(`❌ 网络错误: ${error.message}`, 'error');
+            }
+        }
+        
+        // 获取状态
+        async function getStatus() {
+            try {
+                const response = await fetch('/api/status?t=' + new Date().getTime());
+                const data = await response.json();
+                
+                // 更新状态显示
+                document.getElementById('status').textContent = data.is_running ? '运行中' : '就绪';
+                document.getElementById('progressText').textContent = data.progress + '%';
+                document.getElementById('totalArticles').textContent = data.total_articles;
+                document.getElementById('currentArticle').textContent = data.current_article;
+                document.getElementById('bestsellersFound').textContent = data.bestsellers_found;
+                
+                // 更新进度条
+                const progressBar = document.getElementById('progressBar');
+                progressBar.style.width = data.progress + '%';
+                progressBar.textContent = data.progress + '%';
+                
+                // 更新按钮状态
+                document.getElementById('startBtn').disabled = data.is_running;
+                document.getElementById('stopBtn').disabled = !data.is_running;
+                
+                // 显示错误信息
+                if (data.error) {
+                    addLog(`❌ 错误: ${data.error}`, 'error');
+                }
+            } catch (error) {
+                console.error('获取状态失败:', error);
+            }
+        }
+        
+        let lastLogIndex = 0;
+        
+        // 获取日志
+        async function getLogs() {
+            try {
+                const response = await fetch(`/api/logs?t=${new Date().getTime()}&last_index=${lastLogIndex}`);
+                const data = await response.json();
+                
+                if (data.logs && data.logs.length > 0) {
+                    data.logs.forEach(log => {
+                        addLog(log);
+                    });
+                    lastLogIndex = data.next_index;
+                }
+            } catch (error) {
+                console.error('获取日志失败:', error);
+            }
+        }
+        
+        // 添加日志
+        function addLog(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const timestamp = new Date().toLocaleTimeString();
+            
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            logEntry.innerHTML = `<span class="log-timestamp">[${timestamp}]</span> ${message}`;
+            
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+        
+        // 启动状态更新
+        function startStatusUpdates() {
+            if (!statusInterval) {
+                statusInterval = setInterval(getStatus, 1000);
+            }
+        }
+        
+        // 停止状态更新
+        function stopStatusUpdates() {
+            if (statusInterval) {
+                clearInterval(statusInterval);
+                statusInterval = null;
+            }
+        }
+        
+        // 启动日志更新
+        function startLogUpdates() {
+            if (!logInterval) {
+                logInterval = setInterval(getLogs, 1000);
+            }
+        }
+        
+        // 停止日志更新
+        function stopLogUpdates() {
+            if (logInterval) {
+                clearInterval(logInterval);
+                logInterval = null;
+            }
+        }
+        
+        // 页面加载完成后初始化
+        window.addEventListener('load', function() {
+            loadConfig();
+            getStatus();
+            startStatusUpdates(); // 始终启动状态更新
+            startLogUpdates();    // 始终启动日志更新
+            addLog('🌐 Web界面初始化完成', 'success');
+        });
+        
+        // 页面关闭前清理
+        window.addEventListener('beforeunload', function() {
+            stopStatusUpdates();
+            stopLogUpdates();
+        });
+    </script>
+</body>
+</html>

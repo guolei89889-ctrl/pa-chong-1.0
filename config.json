@@ -1,0 +1,46 @@
+{
+  "bestseller_criteria": {
+    "min_interaction_count": 100,
+    "min_read_count": 1000
+  },
+  "logging": {
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    "level": "DEBUG"
+  },
+  "network": {
+    "allow_redirects": true,
+    "max_redirects": 5,
+    "verify_ssl": false
+  },
+  "output": {
+    "csv_filename": "minshangfa_bestsellers.csv",
+    "encoding": "utf-8-sig",
+    "log_filename": "scraper.log"
+  },
+  "scraping": {
+    "max_pages": 5,
+    "max_retries": 3,
+    "page_delay_max": 4,
+    "page_delay_min": 2,
+    "request_delay_max": 3,
+    "request_delay_min": 1,
+    "request_timeout": 15,
+    "retry_delay": 3
+  },
+  "target_platform": {
+    "base_url": "https://news.baidu.com/",
+    "headers": {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    },
+    "selectors": {
+      "article_links": "a",
+      "author": ".author, .source, .media-name",
+      "collect_count": ".collect-count",
+      "like_count": ".like-count",
+      "publish_time": ".time, .date, .publish-time",
+      "read_count": ".read-count, .view-count",
+      "summary": ".summary, .news-summary, p",
+      "title": "h1, h2, h3, .title, .news-title"
+    }
+  }
+}
